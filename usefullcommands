@@ -1,0 +1,57 @@
+
+
+spark-submit \
+  --master k8s://https://127.0.0.1:6443 \
+  --deploy-mode cluster \
+  --name spark-java-app \
+  --class com.example.MainApplication \
+  --conf spark.executor.instances=1 \
+  --conf spark.kubernetes.container.image=naveen1291/spark-java-app:latest \
+  --conf spark.kubernetes.namespace=default \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+  --conf spark.kubernetes.container.image.pullSecrets=regcred \
+  --conf spark.kubernetes.container.image.pullPolicy=Always \
+  local:///app/app.jar
+
+clearclear
+
+
+spark-submit \
+  --master k8s://https://127.0.0.1:6443 \
+  --deploy-mode client \
+  --name spark-java-wordcount \
+  --class com.example.MainApplication \
+  --conf spark.executor.instances=5 \
+  --conf spark.executor.memory=500m \
+  --conf spark.executor.cores=1 \
+ --conf spark.dynamicAllocation.enabled=false \
+ --conf spark.kubernetes.container.image=apache/spark:latest \
+  --conf spark.kubernetes.namespace=default \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+  /Users/naveenkumarpatil/eclipse-workspace/SparkJava/target/SparkJava-0.0.1-SNAPSHOT.jar
+
+  kubectl create secret docker-registry regcred \
+  --docker-server=<your-registry-server> \
+  --docker-username=<your-username> \
+  --docker-password=<your-password> \
+  --docker-email=<your-email>
+
+
+  kubectl create secret docker-registry regcred \
+  --docker-server=docker.io \
+  --docker-username=naveen1291 \
+  --docker-password=Ganesh@39 \
+  --docker-email=naveen.patil.cbit@gmail.com
+
+  kubectl delete pod spark-java-app-driver
+
+ docker run -it --rm naveen1291/spark-java-app:latest /bin/bash
+
+ docker build . -t spark-java-app:latest
+
+ docker tag spark-java-app:latest naveen1291/spark-java-app:latest
+
+docker push naveen1291/spark-java-app:latest
+
+
+$SPARK_HOME/bin/docker-image-tool.sh -r naveen1291/spark-java-app -t latest push
